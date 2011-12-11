@@ -1,0 +1,42 @@
+A project I had a wierd urge of doing one day,
+So I did it.
+
+Nothing related to any history shit.
+
+What EBot is : 
+
+Just a simple IRC bot made by me
+Developed on JTel , another project of mine
+
+Help + commands :
+
+
+!say <text> . Makes EBot say text. 
+!hello . Greet EBot 
+!lol . Make EBot lol 
+!help . Shows the help page 
+!binary <number> . Shows the binary conversion of the number 	
+!octal <number> . Shows the octal conversion of the number 
+!hex <number> . Shows the hexadecimal conversion of the number 
+!prime <integer> . Checks the primality of the number 
+!random <limit> . Gives a random number from 0 to the limit specified 
+!pick <1starg,2ndarg....,ntharg> . Randomly picks out a choice from the arguments 
+!info . Short description of EBot 
+!ip <domain> . Converts domain to IP address 
+!reverse <text> . Reverses text 
+!1337 <text> . Converts text into leetspeak 
+!quote . Makes EBot say a random quote from the list of quotes 
+!quote <quote> . Adds the quote to the list of quotes 
+!you <text> . Makes EBot rp the text 
+!mode <mode> . Starts a modifier 
+Modifiers: ( to be used with !mode )
+mor : Reveres all text given by EBot
+1337 : Converts all text given by EBot to leetspeak
+All commands are case insensitive. 
+Single command help is not available currently. 
+There are a few more additional commands that are meant for administration. 
+And also a few that do the same as above. Example !mor and !rev function the same as !reverse. 
+The person running EBot can also chat using console 
+Typing anything normally will function as a normal PRIVMSG to the current channel 
+Prepending the text with a "/" will send a direct raw command 
+----------------------End of Help--------------------- 
