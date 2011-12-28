@@ -19,8 +19,11 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
-public class EBot implements Runnable{
+public class EBot extends JFrame implements Runnable{
 	
 	static BufferedReader in;
 	static BufferedReader b;
@@ -29,40 +32,80 @@ public class EBot implements Runnable{
 	static String host;
 	static int port;
 	static String channel;
+	JTextArea incoming;
+	JTextField outgoing;
+	static String expects;
+
+	EBot(){
+		JFrame frame=new JFrame("EBot - IRC Bot");
+		JPanel panel=new JPanel();
+		incoming=new JTextArea(23,120);
+		incoming.setLineWrap(true);
+		incoming.setWrapStyleWord(true);
+		incoming.setEditable(false);
+		JScrollPane scroll=new JScrollPane(incoming, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		scroll.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener(){
+			public void adjustmentValueChanged(AdjustmentEvent e){
+				incoming.select(incoming.getHeight()+1000,0);
+			}
+		});	
+		outgoing=new JTextField(65);
+		JButton send=new JButton("Send");
+		send.addActionListener(new SendButtonListener());
+		outgoing.addActionListener(new SendButtonListener());
+		Font font=new Font("Courier",Font.PLAIN,12);
+		incoming.setFont(font);
+		panel.add(scroll);
+		panel.add(outgoing);
+		panel.add(send);
+		frame.getContentPane().add(BorderLayout.CENTER, panel);
+		frame.setSize(900,500);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setVisible(true);
+		outgoing.requestFocusInWindow();
+	}
 
 	public static void main(String args[])throws IOException{
 		EBot bot=new EBot();
 		bot.go();
 	}
+	public void show(String sho){
+		incoming.append(sho+"\n");
+	}
 	public void go()throws IOException{
 		BufferedReader b=new BufferedReader(new InputStreamReader(System.in));
 		
-		System.out.println("*****************************EBot v1.0*******************************\n");
-		System.out.println("IRC Bot by EnKrypt\n");
+		show("****************************************************EBOT - FOR IRC****************************************************\n");
+		show("IRC Bot by EnKrypt\n");
 		
-		System.out.print("Host: ");
-		host=b.readLine();
-		System.out.print("Port: ");
-		try { 
-			port=Integer.parseInt(b.readLine()); 
-		}
-		catch(Exception e){ 
-			System.out.println("Incorrect format for parameter\nTerminating"); 
-			System.exit(1); 
-		}
-		System.out.print("Channel: ");
-		channel=b.readLine();
+		incoming.append("Host: ");
+		expects="host";
+	}
+	public void go1()throws IOException{
+		outgoing.requestFocusInWindow();
+		incoming.append("Port: ");
+		expects="port";
+	}
+	public void go2()throws IOException{
+		outgoing.requestFocusInWindow();
+		incoming.append("Channel: ");
+		expects="channel";
+	}
+	public void go3()throws IOException, InterruptedException{
 		try {
 			con=new Socket(host,port);
 			in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 			out = new BufferedWriter(new OutputStreamWriter(con.getOutputStream()));
 		}
 		catch (UnknownHostException e) {
-            		System.out.println("Host not found: "+host);
-            		System.exit(1);
+            		show("Host not found: "+host+". Substituting with localhost\n");
+            		con=new Socket("localhost",port);
+			in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			out = new BufferedWriter(new OutputStreamWriter(con.getOutputStream()));
         	} 
 		catch (IOException e) {
-            		System.out.println("Connection error for "+host+" on port "+port);
+            		show("Connection error for "+host+" on port "+port+". Terminating\n");
+			Thread.sleep(5000);
             		System.exit(1);
         	}
 		
@@ -73,50 +116,39 @@ public class EBot implements Runnable{
 		
 		new Thread(this).start();
 		
-		String send="";
-		while(true){ 
-			send=b.readLine();
-			if (send.startsWith("/")){
-				out.write(send.substring(1)+"\r\n");
-				out.flush(); 
-			}
-			else{	
-				out.write("PRIVMSG "+channel+" :"+send+"\r\n");
-				out.flush(); 
-			}
-		}
+		expects="send";
 	}
 	public void run(){
 		String get="";
 		String mode="";
-		String a="",b="",by="";
+		String a="",b="",by="",full="",serv="";
+		int ff=0;
+		int fm=0;
 		int cc=-1;
 		while(true){ 
 			try{
 				get=in.readLine();
-				System.out.println(get); 
 				cc=get.indexOf(":!");
 				if (get.startsWith("PING")){
 					out.write("PONG "+get.substring(5)+"\r\n");
 					out.flush();
-					System.out.println("Ponged");
+			 		get="no";
 				}
 				if (cc!=-1){
 					by=get.substring(1,(get.indexOf("!")));
 					a=get.substring(cc+1);
-					System.out.println("Potential command detected");
 					if (a.startsWith("!say ")||a.startsWith("!SAY ")){
 						type(a.substring(5),mode);
-						System.out.println(by+" made EBot say: "+a.substring(5));
+						show(by+" made EBot say: "+a.substring(5));
 					}
 					if (a.equalsIgnoreCase("!hello")){
 						type("Hello "+by,mode);
-						System.out.println("Greeted: "+by);
+						show("Greeted: "+by);
 					}
 					if (a.equalsIgnoreCase("!lol")){
 						out.write("PRIVMSG "+channel+" :\u0001ACTION lols\u0001\r\n");
 						out.flush();
-						System.out.println(by+" made EBot lol");
+						show(by+" made EBot lol");
 					}
 					if (a.startsWith("!random ")||a.startsWith("!RANDOM ")){
 						int f1=0;
@@ -131,7 +163,7 @@ public class EBot implements Runnable{
 						if (f1==0){	
 						double r=Math.random()*rand;
 						type("Random number between 0 and "+rand+": "+(int)r,mode);	
-						System.out.println(by+" rolled random in range "+rand+" and got "+(int)r);
+						show(by+" rolled random in range "+rand+" and got "+(int)r);
 						}
 					}
 					if (a.startsWith("!prime ")||a.startsWith("!PRIME ")){
@@ -147,11 +179,11 @@ public class EBot implements Runnable{
 						if (f1==0){
 							if (rand==1||rand==0){
 								type("0 and 1 is neither prime nor composite",mode);
-								System.out.println(by+" wanted to see if 0 or 1 was prime or not");
+								show(by+" wanted to see if 0 or 1 was prime or not");
 							}
 							else if (rand<0){
 								type("Negative numbers cannot be Prime",mode);
-								System.out.println(by+" wanted to test the primality of negative numbers");
+								show(by+" wanted to test the primality of negative numbers");
 							}
 							else{
 								int i;	
@@ -159,13 +191,13 @@ public class EBot implements Runnable{
 									int n=rand%i;
 									if (n==0){
 										type("Not prime : "+i,mode);
-										System.out.println(by+" din't know that "+rand+" was not prime");
+										show(by+" din't know that "+rand+" was not prime");
 										break;
 									}
 								}
 								if (i==rand){
 									type(rand+" is Prime",mode);	
-									System.out.println(by+" found out that "+rand+" was prime");
+									show(by+" found out that "+rand+" was prime");
 								}
 							}
 						}
@@ -176,46 +208,46 @@ public class EBot implements Runnable{
 						double rr=Math.random()*ch.length;
 						int r=(int)rr;
 						type("EBot picks "+ch[r],mode);
-						System.out.println("Picked "+ch[r]+" from "+b+" for "+by);
+						show("Picked "+ch[r]+" from "+b+" for "+by);
 					}
 					if (a.startsWith("!raw ")||a.startsWith("!RAW ")){
 						b=a.substring(5);
 						if (by.equals("EnKrypt")){
 							out.write(b+"\r\n");
 							out.flush();
-							System.out.println("Executing raw: "+b);
+							show("Executing raw: "+b);
 						}
 						else{
 							out.write("PRIVMSG "+channel+" ^lol\r\n");
 							out.flush();
-							System.out.println(by+" tried to raw: "+b);
+							show(by+" tried to raw: "+b);
 						}
 					}
 					if (a.equalsIgnoreCase("!version")||a.equalsIgnoreCase("!info")||a.equalsIgnoreCase("!whomademe")||a.equalsIgnoreCase("!author")){
-						type("EBot v2.4  Coded by EnKrypt",mode);
+						type("EBot v2.9  Coded by EnKrypt",mode);
 						type("EnKrypt IRC Bot",mode);
-						System.out.println(by+" now knows more about EBot");
+						show(by+" now knows more about EBot");
 					}
 					if (a.startsWith("!ip ")||a.startsWith("!IP ")){
 						b=a.substring(4);
 						InetAddress dom = java.net.InetAddress.getByName(b);
 						type(b+" translates to "+dom.getHostAddress(),mode);
-						System.out.println(by+" found the ip of "+b+" to be "+dom.getHostAddress());
+						show(by+" found the ip of "+b+" to be "+dom.getHostAddress());
 					}
 					if (a.startsWith("!reverse ")||a.startsWith("!REVERSE ")){
 						b=a.substring(9);
 						type(b,"mor");
-						System.out.println(by+" reversed "+b);
+						show(by+" reversed "+b);
 					}
 					if (a.startsWith("!rev ")||a.startsWith("!REV ")||a.startsWith("!mor ")||a.startsWith("!MOR ")){
 						b=a.substring(5);
 						type(b,"mor");
-						System.out.println(by+" reversed "+b);
+						show(by+" reversed "+b);
 					}
 					if (a.startsWith("!1337 ")||a.startsWith("!leet ")||a.startsWith("!LEET ")){
 						b=a.substring(6);
 						type(b,"1337");
-						System.out.println(by+" 1337: "+b);
+						show(by+" 1337: "+b);
 					}
 					if (a.startsWith("!quote ")||a.startsWith("!QUOTE ")){
 						b=a.substring(7);
@@ -234,7 +266,7 @@ public class EBot implements Runnable{
 							l.write("\""+b+"\" ~ "+by);
 							l.close();
 							type("Quote saved",mode);
-							System.out.println(by+" saved quote "+b);
+							show(by+" saved quote "+b);
 						}
 					}
 					if (a.equalsIgnoreCase("!quote")){
@@ -251,7 +283,7 @@ public class EBot implements Runnable{
 						}
 						l.close();
 						type(info,mode);
-						System.out.println(by+" got a quote: "+info+" at line "+rand);
+						show(by+" got a quote: "+info+" at line "+rand);
 					}
 					if (a.startsWith("!binary ")||a.startsWith("!BINARY ")){
 						int f1=0;
@@ -266,7 +298,7 @@ public class EBot implements Runnable{
 						if (f1==0){
 							String bin = Integer.toBinaryString(rand);
 							type(bin,mode);
-							System.out.println(by+" found out that the binary of "+rand+" was "+bin);
+							show(by+" found out that the binary of "+rand+" was "+bin);
 						}
 					}
 					if (a.startsWith("!octal ")||a.startsWith("!OCTAL ")){
@@ -282,7 +314,7 @@ public class EBot implements Runnable{
 						if (f1==0){
 							String bin = "0"+Integer.toOctalString(rand);
 							type(bin,mode);
-							System.out.println(by+" found out that the octal of "+rand+" was "+bin);
+							show(by+" found out that the octal of "+rand+" was "+bin);
 						}
 					}
 					if (a.startsWith("!hex ")||a.startsWith("!HEX ")){
@@ -298,13 +330,13 @@ public class EBot implements Runnable{
 						if (f1==0){
 							String bin = "0x"+Integer.toHexString(rand).toUpperCase();
 							type(bin,mode);
-							System.out.println(by+" found out that the hex of "+rand+" was "+bin);
+							show(by+" found out that the hex of "+rand+" was "+bin);
 						}
 					}
 					if (a.startsWith("!you ")||a.startsWith("!YOU ")){
 						out.write("PRIVMSG "+channel+" :\u0001ACTION "+a.substring(5)+"\u0001\r\n");
 						out.flush();
-						System.out.println(by+" made EBot do: "+a.substring(5));
+						show(by+" made EBot do: "+a.substring(5));
 					}
 					if (a.startsWith("!mode ")||a.startsWith("!MODE ")){
 						b=a.substring(6);
@@ -312,24 +344,24 @@ public class EBot implements Runnable{
 							if (mode.equals("mor")){
 								mode="";
 								type("Mor modifier deactivated",mode);
-								System.out.println(by+" deactivated mor mode");
+								show(by+" deactivated mor mode");
 							}
 							else{
 								mode="mor";
 								type("Mor modifier activated",mode);
-								System.out.println(by+" activated "+mode+" mode");
+								show(by+" activated "+mode+" mode");
 							}
 						}
 						if (b.equalsIgnoreCase("1337")){
 							if (mode.equals("1337")){
 								mode="";
 								type("1337 modifier deactivated",mode);
-								System.out.println(by+" deactivated 1337 mode");
+								show(by+" deactivated 1337 mode");
 							}
 							else{
 								mode="1337";
 								type("1337 modifier activated",mode);
-								System.out.println(by+" activated "+mode+" mode");
+								show(by+" activated "+mode+" mode");
 							}
 						}
 					}
@@ -377,8 +409,54 @@ public class EBot implements Runnable{
 						type("Typing anything normally will function as a normal PRIVMSG to the current channel ",mode);
 						type("Prepending the text with a \"/\" will send a direct raw command ",mode);
 						type("----------------------End of Help--------------------- ",mode);
-						System.out.println(by+" needed help with EBot");
-					}
+						show(by+" needed help with EBot");
+					} 
+				}
+				if (get.indexOf("NOTICE AUTH")!=-1){
+					serv=get.substring(1,get.indexOf("NOTICE"));
+				}
+				if (get.indexOf("are supported by this server")!=-1&&fm==0){
+					show("Succcessfully connected to "+host);
+					fm=1;
+				}
+				if (get.indexOf("372 EBot :-")!=-1&&ff==0){
+					get=host+" Message of the Day : ";
+					ff=1;
+				}
+				if (get.indexOf("372 EBot :-")!=-1&&ff==1){
+					get=get.substring(get.indexOf(":-")+1);
+				}
+				if (get.indexOf("366 EBot")!=-1){
+					show("Joined "+get.substring(get.indexOf("366 EBot")+9,get.indexOf(":",get.indexOf("366 EBot"))));
+				}
+				
+				if (get.startsWith(":irc.localhost")||get.startsWith(":"+host)||get.startsWith(":"+serv)){
+					get="no";
+				}
+				if (get.startsWith(":")&&get.indexOf("!")!=-1){
+					by=get.substring(1,(get.indexOf("!")));
+					full=get.substring(1,(get.indexOf(" ")));
+				}
+				if (get.startsWith(":"+full)&&get.indexOf("ACTION")!=-1){
+					get="* "+by+" "+get.substring(get.indexOf("ACTION")+7);
+				}
+				if (get.startsWith(":"+full+" PRIVMSG ")){
+					get=by+" : "+get.substring(get.indexOf(":",2)+1);
+				}
+				if (get.startsWith(":"+full+" TOPIC ")){
+					get=by+" has changed the topic to: "+get.substring(get.indexOf(":",2)+1);
+				}
+				if (get.startsWith(":"+full+" NICK ")){
+					get=by+" is now known as "+get.substring(get.indexOf(":",2)+1);
+				}
+				if (get.startsWith(":"+full+" JOIN ")){
+					get=by+" has joined "+get.substring(get.indexOf(":",2)+1);
+				}
+				if (get.startsWith(":"+full+" QUIT ")){
+					get=by+" has left the channel ("+get.substring(get.indexOf(":",2)+1)+")";
+				}
+				if (!get.equals("no")){
+				show(get);
 				}
 			}
 			catch(Exception e){
@@ -396,12 +474,12 @@ public class EBot implements Runnable{
 			b=reverse.toString();
 		}
 		if (mode.equals("1337")){
-			String[] aa={"a","A","e","E","g","G","i","I","r","o","O","R","s","S","t","T"};
-			String[] bb={"4","4","3","3","6","6","1","1","2","0","0","2","5","5","7","7"};
+			b=b.toUpperCase();
+			String[] aa={"A","B","C","D","E","G","H","I","K","L","M","N","O","R","S","T","U","V","W","Y"};
+			String[] bb={"4","8","(","|>","3","6","|-|","1","|<","|_","/\\\\/\\\\","/\\\\/","0","2","5","7","|_|","\\\\/","\\\\/\\\\/","'/"};
 			for (int i=0;i<aa.length;i++){
 				b=b.replaceAll(aa[i],bb[i]);
 			}
-			b=b.toUpperCase();
 		}
 		out.write("PRIVMSG "+channel+" :"+b+"\r\n");
 		out.flush();
@@ -416,4 +494,64 @@ public class EBot implements Runnable{
 		}
 		return count;
     	}
+public class SendButtonListener implements ActionListener{
+	public void actionPerformed(ActionEvent e){
+		if (expects.equals("host")){
+			host=outgoing.getText();
+			show(""+host);
+			expects="";
+			outgoing.setText("");
+			try{
+				go1();
+				return ;
+			}
+			catch(Exception n){}
+		}
+		if (expects.equals("port")){
+			try {
+				port=Integer.parseInt(outgoing.getText());
+			}
+			catch(Exception ex){	
+				show("Incorrect parameter for port. Substituting with 6667\n");
+				port=6667;
+			}
+			show(""+port);
+			expects="";
+			outgoing.setText("");
+			try{
+				go2();
+				return ;
+			}
+			catch(Exception n){}
+		}
+		if (expects.equals("channel")){
+			channel=outgoing.getText();
+			show(""+channel);
+			expects="";
+			outgoing.setText("");
+			try{
+				go3();
+				return ;
+			}
+			catch(Exception n){}
+		}
+		if (expects.equals("send")){
+			String send=""; 
+			send=outgoing.getText();
+			try{
+			if (send.startsWith("/")){
+				out.write(send.substring(1)+"\r\n");
+				out.flush(); 
+			}
+			else{	
+				out.write("PRIVMSG "+channel+" :"+send+"\r\n");
+				out.flush(); 
+			}
+			}
+			catch(Exception n){}
+			outgoing.setText("");
+			outgoing.requestFocusInWindow();
+		}
+	}
+} 
 }

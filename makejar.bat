@@ -1,0 +1,1 @@
+jar cvfm EBot.jar manifest.txt *.class
