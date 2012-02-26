@@ -19,6 +19,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.regex.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -35,6 +36,17 @@ public class EBot extends JFrame implements Runnable{
 	JTextArea incoming;
 	JTextField outgoing;
 	static String expects;
+	static Pattern lisp;
+	static Matcher now;
+	static Pattern quo;
+	static Matcher nowa;
+	static Pattern elisp;
+	static Matcher enow;
+	static Pattern equo;
+	static Matcher enowa;
+	static Map var=new HashMap();
+	static String result;
+	static String eresult;
 
 	EBot(){
 		JFrame frame=new JFrame("EBot - IRC Bot");
@@ -98,15 +110,16 @@ public class EBot extends JFrame implements Runnable{
 			out = new BufferedWriter(new OutputStreamWriter(con.getOutputStream()));
 		}
 		catch (UnknownHostException e) {
-            		show("Host not found: "+host+". Substituting with localhost\n");
+            		show("Host not found: "+host+". Substituting with localhost");
+			host="localhost";
             		con=new Socket("localhost",port);
 			in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 			out = new BufferedWriter(new OutputStreamWriter(con.getOutputStream()));
         	} 
 		catch (IOException e) {
-            		show("Connection error for "+host+" on port "+port+". Terminating\n");
-			Thread.sleep(5000);
-            		System.exit(1);
+            		show("Connection error for "+host+" on port "+port+". \n");
+			expects="error";
+			return ;
         	}
 		
 		out.write("NICK " + "EBot" + "\r\n");
@@ -121,10 +134,11 @@ public class EBot extends JFrame implements Runnable{
 	public void run(){
 		String get="";
 		String mode="";
-		String a="",b="",by="",full="",serv="";
+		String a="",b="",by="",full="";
 		int ff=0;
 		int fm=0;
 		int cc=-1;
+		int fr=0;
 		while(true){ 
 			try{
 				get=in.readLine();
@@ -224,7 +238,7 @@ public class EBot extends JFrame implements Runnable{
 						}
 					}
 					if (a.equalsIgnoreCase("!version")||a.equalsIgnoreCase("!info")||a.equalsIgnoreCase("!whomademe")||a.equalsIgnoreCase("!author")){
-						type("EBot v2.9  Coded by EnKrypt",mode);
+						type("EBot v3.0  Coded by EnKrypt . Last update on 02.26.12",mode);
 						type("EnKrypt IRC Bot",mode);
 						show(by+" now knows more about EBot");
 					}
@@ -317,6 +331,12 @@ public class EBot extends JFrame implements Runnable{
 							show(by+" found out that the octal of "+rand+" was "+bin);
 						}
 					}
+					if (a.startsWith("!pl ")||a.startsWith("!PL ")){
+						String reg=a.substring(4);
+						String fina=dot(reg);
+						type("Result: "+fina,mode);
+						show(by+" Used Lisp to evaluate "+reg);
+					}
 					if (a.startsWith("!hex ")||a.startsWith("!HEX ")){
 						int f1=0;
 						int rand=0;
@@ -389,6 +409,7 @@ public class EBot extends JFrame implements Runnable{
 						type("!quote . Makes EBot say a random quote from the list of quotes ",mode);
 						type("!quote <quote> . Adds the quote to the list of quotes ",mode);
 						type("!you <text> . Makes EBot rp the text ",mode);
+						type("!pl <lisp expression> . Evaluates the Lisp expression by running it through EBot's integrated PL-0 parser ",mode);
 						type("!mode <mode> . Starts a modifier ",mode);
 						type(" ",mode);
 						try{
@@ -412,9 +433,7 @@ public class EBot extends JFrame implements Runnable{
 						show(by+" needed help with EBot");
 					} 
 				}
-				if (get.indexOf("NOTICE AUTH")!=-1){
-					serv=get.substring(1,get.indexOf("NOTICE"));
-				}
+				
 				if (get.indexOf("are supported by this server")!=-1&&fm==0){
 					show("Succcessfully connected to "+host);
 					fm=1;
@@ -428,10 +447,13 @@ public class EBot extends JFrame implements Runnable{
 				}
 				if (get.indexOf("366 EBot")!=-1){
 					show("Joined "+get.substring(get.indexOf("366 EBot")+9,get.indexOf(":",get.indexOf("366 EBot"))));
+					fr=1;
 				}
-				
-				if (get.startsWith(":irc.localhost")||get.startsWith(":"+host)||get.startsWith(":"+serv)){
-					get="no";
+				if (get.startsWith(":irc.localhost")||get.startsWith(":"+host)){
+					if (fr==1)
+						get=get.substring(get.lastIndexOf(":")+1);
+					else
+						get="no";
 				}
 				if (get.startsWith(":")&&get.indexOf("!")!=-1){
 					by=get.substring(1,(get.indexOf("!")));
@@ -460,7 +482,7 @@ public class EBot extends JFrame implements Runnable{
 				}
 			}
 			catch(Exception e){
-				e.printStackTrace(); 
+				 e.printStackTrace();
 			}
 		}
 	}
@@ -494,6 +516,230 @@ public class EBot extends JFrame implements Runnable{
 		}
 		return count;
     	}
+	public String dot(String code){
+		quo=Pattern.compile("'[^'\"]*\"");
+		nowa=quo.matcher(code);
+		code=unquote(code);
+		lisp=Pattern.compile("\\([^()]*\\)");
+		now=lisp.matcher(code);
+		while (now.find()){
+			String m=now.group(0);
+			m=m.replace("(","");
+			m=m.replace(")","");
+			String[] arg=m.split(" ");
+			String res=eval(arg);
+			result = now.replaceFirst(res);
+			return dot(result);
+		}
+		String[] cfin=code.split(" ");
+		return cfin[cfin.length-1];
+	}
+	public String eval(String arg[]){
+		arg=requote(arg);
+		if (arg[0].equalsIgnoreCase("add")){
+			int cres=0;
+			for (int i=1;i<arg.length;i++){
+				cres+=Integer.parseInt(arg[i]);
+			}
+			return ""+cres;
+		}
+		else if (arg[0].equalsIgnoreCase("sub")){
+			int cres=Integer.parseInt(arg[1]);
+			for (int i=2;i<arg.length;i++){
+				cres-=Integer.parseInt(arg[i]);
+			}
+			return ""+cres;
+		}
+		else if (arg[0].equalsIgnoreCase("mul")){
+			int cres=Integer.parseInt(arg[1]);;
+			for (int i=2;i<arg.length;i++){
+				cres*=Integer.parseInt(arg[i]);
+			}
+			return ""+cres;
+		}
+		else if (arg[0].equalsIgnoreCase("div")){
+			int cres=Integer.parseInt(arg[1]);
+			for (int i=2;i<arg.length;i++){
+				cres/=Integer.parseInt(arg[i]);
+			}
+			return ""+cres;
+		}
+		else if (arg[0].equalsIgnoreCase("cat")){
+			String cres="";
+			for (int i=1;i<arg.length;i++){
+				cres+=arg[i];
+			}
+			return cres;
+		}
+		else if (arg[0].equalsIgnoreCase("eval")){
+			String cres="";
+			for (int i=1;i<arg.length;i++){
+				cres+=evaldot(arg[i])+" ";
+			}
+			String[] cfn=cres.split(" ");
+			return cfn[cfn.length-1];
+		}
+		else if (arg[0].equalsIgnoreCase("slice")){
+			String cres="";
+			cres=arg[1].substring(Integer.parseInt(arg[2]),Integer.parseInt(arg[3])+1);
+			return cres;
+		}
+		else if (arg[0].equalsIgnoreCase("eq")){
+			String cres="";
+			String eqchk=arg[1];
+			int flag=1;
+			for (int i=1;i<arg.length;i++){
+				if (!arg[i].equalsIgnoreCase(eqchk)){
+					flag=0;
+				}
+			}
+			return flag+"";
+		}
+		else if (arg[0].equalsIgnoreCase("gt")){
+			String cres="";
+			int flag=1;
+			for (int i=2;i<arg.length;i++){
+				if (Math.max(Integer.parseInt(arg[i-1]),Integer.parseInt(arg[i]))!=Integer.parseInt(arg[i-1])){
+					flag=0;
+				}
+			}
+			return flag+"";
+		}
+		else if (arg[0].equalsIgnoreCase("lt")){
+			String cres="";
+			int flag=1;
+			for (int i=2;i<arg.length;i++){
+				if (Math.min(Integer.parseInt(arg[i-1]),Integer.parseInt(arg[i]))!=Integer.parseInt(arg[i-1])){
+					flag=0;
+				}
+			}
+			return flag+"";
+		}
+		else if (arg[0].equalsIgnoreCase("and")){
+			String cres="";
+			int flag=1;
+			for (int i=1;i<arg.length;i++){
+				if (arg[i].equalsIgnoreCase("0")){
+					flag=0;
+				}
+			}
+			return flag+"";
+		}
+		else if (arg[0].equalsIgnoreCase("or")){
+			String cres="";
+			int flag=1;
+			for (int i=1;i<arg.length;i++){
+				if (!arg[i].equalsIgnoreCase("0")){
+					flag=0;
+				}
+			}
+			return flag+"";
+		}
+		else if (arg[0].equalsIgnoreCase("not")){
+			String cres="";
+			if (arg.length==2&&arg[1].equalsIgnoreCase("0")){
+				return "1";
+			}
+			else{
+				return "0";
+			}
+		}
+		else if (arg[0].equalsIgnoreCase("print")){
+			String cres="";
+			for (int i=1;i<arg.length;i++){
+				cres+=arg[i]+" ";
+			}
+			System.out.println(cres);
+			return "";
+		}
+		else if (arg[0].equalsIgnoreCase("read")){
+			String cres="";
+			for (int i=1;i<arg.length;i++){
+				cres+=arg[i]+" ";
+			}
+			System.out.print(cres);
+			try{
+				BufferedReader b=new BufferedReader(new InputStreamReader(System.in));
+				cres=b.readLine();
+			}
+			catch(Exception e) {}
+			return cres;
+		}
+		else if (arg[0].equalsIgnoreCase("pass")){
+			String cres="";
+			return "";
+		}
+		else if (arg[0].equalsIgnoreCase("if")){
+			if (arg[1].equalsIgnoreCase("0")){
+				return evaldot(arg[3]);
+			}
+			else{
+				return evaldot(arg[2]);
+			}
+		}
+		else if (arg[0].equalsIgnoreCase("var")&&arg.length==3){
+			var.put(arg[1],arg[2]);
+			return "";
+		}
+		else if (arg[0].equalsIgnoreCase("var")&&arg.length==2){
+			String setvar="";
+			try{
+				setvar=var.get(arg[1]).toString();
+			}
+			catch(NullPointerException npe){
+				setvar="0";
+			}
+			return ""+setvar;
+		}
+		else{
+			return "";
+		}
+	}
+	public String[] requote(String[] ar) {
+		for(int i=0;i<ar.length;i++) {
+    			ar[i] = ar[i].replaceAll("---","'");
+  			ar[i] = ar[i].replaceAll("~~~","\"");
+  			ar[i] = ar[i].replaceAll("\\{","(");
+  			ar[i] = ar[i].replaceAll("\\}",")");
+  			ar[i] = ar[i].replaceAll("^'","");
+    			ar[i] = ar[i].replaceAll("\"$","");
+    			ar[i] = ar[i].replaceAll("<>"," ");
+  		}
+  		return ar;
+	}
+	public String unquote(String ar) {
+		quo=Pattern.compile("'[^'\"]*\"");
+		nowa=quo.matcher(ar);
+  		while(nowa.find()) {
+			String m=nowa.group(0);
+    			m = m.replaceAll("^.","---");
+    			m = m.replaceAll(".$","~~~");
+    			m = m.replaceAll("\\(","{");
+    			m = m.replaceAll("\\)","}");
+    			m = m.replaceAll(" ","<>");
+    			String result = nowa.replaceFirst(m);
+			return unquote(result);
+  		}
+		return ar;
+	}
+	public String evaldot(String code){
+		equo=Pattern.compile("'[^'\"]*\"");
+		enowa=equo.matcher(code);
+		code=unquote(code);
+		elisp=Pattern.compile("\\([^()]*\\)");
+		enow=elisp.matcher(code);
+		while (enow.find()){
+			String m=enow.group(0);
+			m=m.replace("(","");
+			m=m.replace(")","");
+			String[] arg=m.split(" ");
+			String res=eval(arg);
+			eresult = enow.replaceFirst(res);
+			return evaldot(eresult);
+		}
+		String[] cfin=code.split(" ");
+		return cfin[cfin.length-1];
+	}
 public class SendButtonListener implements ActionListener{
 	public void actionPerformed(ActionEvent e){
 		if (expects.equals("host")){
@@ -512,7 +758,7 @@ public class SendButtonListener implements ActionListener{
 				port=Integer.parseInt(outgoing.getText());
 			}
 			catch(Exception ex){	
-				show("Incorrect parameter for port. Substituting with 6667\n");
+				show("Incorrect parameter for port. Substituting with 6667");
 				port=6667;
 			}
 			show(""+port);
@@ -542,15 +788,25 @@ public class SendButtonListener implements ActionListener{
 			if (send.startsWith("/")){
 				out.write(send.substring(1)+"\r\n");
 				out.flush(); 
+				show("RAW- "+send.substring(1));
 			}
 			else{	
 				out.write("PRIVMSG "+channel+" :"+send+"\r\n");
 				out.flush(); 
+				show("EBot : "+send);
 			}
 			}
 			catch(Exception n){}
 			outgoing.setText("");
 			outgoing.requestFocusInWindow();
+		}
+		if (expects.equals("error")){
+			show("Please restart the application");
+			outgoing.setText("");
+			try { 
+				return ; 
+			}
+			catch(Exception n){}
 		}
 	}
 } 
