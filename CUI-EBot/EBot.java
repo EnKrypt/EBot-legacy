@@ -49,32 +49,7 @@ public class EBot extends JFrame implements Runnable{
 	static String eresult;
 
 	EBot(){
-		JFrame frame=new JFrame("EBot - IRC Bot");
-		JPanel panel=new JPanel();
-		incoming=new JTextArea(23,120);
-		incoming.setLineWrap(true);
-		incoming.setWrapStyleWord(true);
-		incoming.setEditable(false);
-		JScrollPane scroll=new JScrollPane(incoming, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		scroll.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener(){
-			public void adjustmentValueChanged(AdjustmentEvent e){
-				incoming.select(incoming.getHeight()+10000,0);
-			}
-		});	
-		outgoing=new JTextField(65);
-		JButton send=new JButton("Send");
-		send.addActionListener(new SendButtonListener());
-		outgoing.addActionListener(new SendButtonListener());
-		Font font=new Font("Courier",Font.PLAIN,12);
-		incoming.setFont(font);
-		panel.add(scroll);
-		panel.add(outgoing);
-		panel.add(send);
-		frame.getContentPane().add(BorderLayout.CENTER, panel);
-		frame.setSize(900,500);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setVisible(true);
-		outgoing.requestFocusInWindow();
+		
 	}
 
 	public static void main(String args[])throws IOException{
@@ -82,44 +57,38 @@ public class EBot extends JFrame implements Runnable{
 		bot.go();
 	}
 	public void show(String sho){
-		incoming.append(sho+"\n");
+		System.out.println(sho);
 	}
 	public void go()throws IOException{
 		BufferedReader b=new BufferedReader(new InputStreamReader(System.in));
 		
-		show("****************************************************EBOT - FOR IRC****************************************************\n");
-		show("IRC Bot by EnKrypt\n");
+		System.out.println("*****************************EBot v1.0*******************************\n");
+		System.out.println("IRC Bot by EnKrypt\n");
 		
-		incoming.append("Host: ");
-		expects="host";
-	}
-	public void go1()throws IOException{
-		outgoing.requestFocusInWindow();
-		incoming.append("Port: ");
-		expects="port";
-	}
-	public void go2()throws IOException{
-		outgoing.requestFocusInWindow();
-		incoming.append("Channel: ");
-		expects="channel";
-	}
-	public void go3()throws IOException, InterruptedException{
+		System.out.print("Host: ");
+		host=b.readLine();
+		System.out.print("Port: ");
+		try { 
+			port=Integer.parseInt(b.readLine()); 
+		}
+		catch(Exception e){ 
+			System.out.println("Incorrect format for parameter\nTerminating"); 
+			System.exit(1); 
+		}
+		System.out.print("Channel: ");
+		channel=b.readLine();
 		try {
 			con=new Socket(host,port);
 			in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 			out = new BufferedWriter(new OutputStreamWriter(con.getOutputStream()));
 		}
 		catch (UnknownHostException e) {
-            		show("Host not found: "+host+". Substituting with localhost");
-			host="localhost";
-            		con=new Socket("localhost",port);
-			in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-			out = new BufferedWriter(new OutputStreamWriter(con.getOutputStream()));
+            		System.out.println("Host not found: "+host);
+            		System.exit(1);
         	} 
 		catch (IOException e) {
-            		show("Connection error for "+host+" on port "+port+". \n");
-			expects="error";
-			return ;
+            		System.out.println("Connection error for "+host+" on port "+port);
+            		System.exit(1);
         	}
 		
 		out.write("NICK " + "EBot" + "\r\n");
@@ -130,6 +99,18 @@ public class EBot extends JFrame implements Runnable{
 		new Thread(this).start();
 		
 		expects="send";
+		String send="";
+		while(true){ 
+			send=b.readLine();
+			if (send.startsWith("/")){
+				out.write(send.substring(1)+"\r\n");
+				out.flush(); 
+			}
+			else{	
+				out.write("PRIVMSG "+channel+" :"+send+"\r\n");
+				out.flush(); 
+			}
+		}
 	}
 	public void run(){
 		String get="";
@@ -748,74 +729,6 @@ public class EBot extends JFrame implements Runnable{
 		String[] cfin=code.split(" ");
 		return cfin[cfin.length-1];
 	}
-public class SendButtonListener implements ActionListener{
-	public void actionPerformed(ActionEvent e){
-		if (expects.equals("host")){
-			host=outgoing.getText();
-			show(""+host);
-			expects="";
-			outgoing.setText("");
-			try{
-				go1();
-				return ;
-			}
-			catch(Exception n){}
-		}
-		if (expects.equals("port")){
-			try {
-				port=Integer.parseInt(outgoing.getText());
-			}
-			catch(Exception ex){	
-				show("Incorrect parameter for port. Substituting with 6667");
-				port=6667;
-			}
-			show(""+port);
-			expects="";
-			outgoing.setText("");
-			try{
-				go2();
-				return ;
-			}
-			catch(Exception n){}
-		}
-		if (expects.equals("channel")){
-			channel=outgoing.getText();
-			show(""+channel);
-			expects="";
-			outgoing.setText("");
-			try{
-				go3();
-				return ;
-			}
-			catch(Exception n){}
-		}
-		if (expects.equals("send")){
-			String send=""; 
-			send=outgoing.getText();
-			try{
-			if (send.startsWith("/")){
-				out.write(send.substring(1)+"\r\n");
-				out.flush(); 
-				show("RAW- "+send.substring(1));
-			}
-			else{	
-				out.write("PRIVMSG "+channel+" :"+send+"\r\n");
-				out.flush(); 
-				show("EBot : "+send);
-			}
-			}
-			catch(Exception n){}
-			outgoing.setText("");
-			outgoing.requestFocusInWindow();
-		}
-		if (expects.equals("error")){
-			show("Please restart the application");
-			outgoing.setText("");
-			try { 
-				return ; 
-			}
-			catch(Exception n){}
-		}
-	}
-} 
+
+ 
 }
