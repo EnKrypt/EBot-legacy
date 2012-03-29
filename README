@@ -31,6 +31,7 @@ Help + commands :
 !quote <quote> . Adds the quote to the list of quotes 
 !you <text> . Makes EBot rp the text 
 !mode <mode> . Starts a modifier 
+!google <text> . Makes Ebot google the text
 Modifiers: ( to be used with !mode )
 mor : Reveres all text given by EBot
 1337 : Converts all text given by EBot to leetspeak
