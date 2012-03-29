@@ -237,8 +237,17 @@ public class EBot extends JFrame implements Runnable{
 							show(by+" tried to raw: "+b);
 						}
 					}
+					if (a.startsWith("!google ") || a.startsWith("!GOOGLE ")){
+					    b = a.substring(8);
+					    String[] gl = b.split(" ");
+					    String mktype = "http://www.google.com/search?q=";
+					    for (int i = 0; i < gl.length; i++){
+					        mktype = mktype + "+" + gl[i];
+					       }
+					    type("EBot googled for you: " + mktype,mode);
+					}
 					if (a.equalsIgnoreCase("!version")||a.equalsIgnoreCase("!info")||a.equalsIgnoreCase("!whomademe")||a.equalsIgnoreCase("!author")){
-						type("EBot v3.0  Coded by EnKrypt . Last update on 02.26.12",mode);
+						type("EBot v3.0  Coded by EnKrypt . Last Update by Lance . Last update on 03.18.12",mode);
 						type("EnKrypt IRC Bot",mode);
 						show(by+" now knows more about EBot");
 					}
@@ -409,6 +418,7 @@ public class EBot extends JFrame implements Runnable{
 						type("!quote . Makes EBot say a random quote from the list of quotes ",mode);
 						type("!quote <quote> . Adds the quote to the list of quotes ",mode);
 						type("!you <text> . Makes EBot rp the text ",mode);
+						type("!google <text> . Makes Ebot google that line of text ",mode);
 						type("!pl <lisp expression> . Evaluates the Lisp expression by running it through EBot's integrated PL-0 parser ",mode);
 						type("!mode <mode> . Starts a modifier ",mode);
 						type(" ",mode);
