@@ -1,14 +1,13 @@
-A project I had a wierd urge of doing one day,
-So I did it.
-
-Nothing related to any history shit.
+An immensely fun and interesting project which I enjoyed doing.
 
 What EBot is : 
 
 Just a simple IRC bot made by me
-Developed on JTel , another project of mine
+Expanded on JTel , another project of mine
 
-A CUI Version has been included after the 3.0 release to ensure compatibility over command line utilities
+A CUI Version has been included after the 3.0 release to ensure compatibility over command line utilities.
+
+LogBot v1.0 has also been added. LogBot is just an extension and a modified EBot , suited solely for logging. It logs all conversation to log.txt and does not serve any commands. Due to thae fact that this just an edited version of EBot , LogBot can have many unnecessary residue from the commands of EBot and can resemble EBot in many ways.
 
 Help + commands :
 
@@ -30,6 +29,7 @@ Help + commands :
 !quote . Makes EBot say a random quote from the list of quotes 
 !quote <quote> . Adds the quote to the list of quotes 
 !you <text> . Makes EBot rp the text 
+!pl <lisp expression> . Evaluates the Lisp expression by running it through EBot's integrated PL-0 parser 
 !mode <mode> . Starts a modifier 
 !google <text> . Makes Ebot google the text
 Modifiers: ( to be used with !mode )

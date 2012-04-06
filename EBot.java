@@ -229,7 +229,10 @@ public class EBot extends JFrame implements Runnable{
 						if (by.equals("EnKrypt")){
 							out.write(b+"\r\n");
 							out.flush();
-							show("Executing raw: "+b);
+							String resp=in.readLine();
+							resp=resp.substring(resp.lastIndexOf(":")+1);
+							type(resp,mode);
+							show("Executing raw: "+b+" Got: "+resp);
 						}
 						else{
 							out.write("PRIVMSG "+channel+" ^lol\r\n");
@@ -237,17 +240,8 @@ public class EBot extends JFrame implements Runnable{
 							show(by+" tried to raw: "+b);
 						}
 					}
-					if (a.startsWith("!google ") || a.startsWith("!GOOGLE ")){
-					    b = a.substring(8);
-					    String[] gl = b.split(" ");
-					    String mktype = "http://www.google.com/search?q=";
-					    for (int i = 0; i < gl.length; i++){
-					        mktype = mktype + "+" + gl[i];
-					       }
-					    type("EBot googled for you: " + mktype,mode);
-					}
 					if (a.equalsIgnoreCase("!version")||a.equalsIgnoreCase("!info")||a.equalsIgnoreCase("!whomademe")||a.equalsIgnoreCase("!author")){
-						type("EBot v3.0  Coded by EnKrypt . Last Update by Lance . Last update on 03.18.12",mode);
+						type("EBot v3.4  Coded by EnKrypt . Last update on 04.06.12",mode);
 						type("EnKrypt IRC Bot",mode);
 						show(by+" now knows more about EBot");
 					}
@@ -418,7 +412,6 @@ public class EBot extends JFrame implements Runnable{
 						type("!quote . Makes EBot say a random quote from the list of quotes ",mode);
 						type("!quote <quote> . Adds the quote to the list of quotes ",mode);
 						type("!you <text> . Makes EBot rp the text ",mode);
-						type("!google <text> . Makes Ebot google that line of text ",mode);
 						type("!pl <lisp expression> . Evaluates the Lisp expression by running it through EBot's integrated PL-0 parser ",mode);
 						type("!mode <mode> . Starts a modifier ",mode);
 						type(" ",mode);
@@ -533,6 +526,10 @@ public class EBot extends JFrame implements Runnable{
 		return count;
     	}
 	public String dot(String code){
+        Pattern lisp;
+        Matcher now;
+        Pattern quo;
+        Matcher nowa;
 		quo=Pattern.compile("'[^'\"]*\"");
 		nowa=quo.matcher(code);
 		code=unquote(code);
@@ -542,16 +539,22 @@ public class EBot extends JFrame implements Runnable{
 			String m=now.group(0);
 			m=m.replace("(","");
 			m=m.replace(")","");
+            m=m.replaceAll(" +"," ");
 			String[] arg=m.split(" ");
 			String res=eval(arg);
 			result = now.replaceFirst(res);
 			return dot(result);
 		}
 		String[] cfin=code.split(" ");
-		return cfin[cfin.length-1];
+        if (cfin.length != 0)
+            return cfin[cfin.length-1];
+        return "";
 	}
 	public String eval(String arg[]){
 		arg=requote(arg);
+                 // for(int i=0;i<arg.length;++i){
+                 //     System.out.println(i+" : "+arg[i]);
+                 // }
 		if (arg[0].equalsIgnoreCase("add")){
 			int cres=0;
 			for (int i=1;i<arg.length;i++){
@@ -589,11 +592,10 @@ public class EBot extends JFrame implements Runnable{
 		}
 		else if (arg[0].equalsIgnoreCase("eval")){
 			String cres="";
-			for (int i=1;i<arg.length;i++){
-				cres+=evaldot(arg[i])+" ";
-			}
-			String[] cfn=cres.split(" ");
-			return cfn[cfn.length-1];
+            arg[0] = "";
+            cres = combine(arg," ");
+            cres=dot(cres);
+            return cres;
 		}
 		else if (arg[0].equalsIgnoreCase("slice")){
 			String cres="";
@@ -666,12 +668,12 @@ public class EBot extends JFrame implements Runnable{
 				cres+=arg[i]+" ";
 			}
 			try{
-				type(cres,"");
+                type(cres,"");
 			}
 			catch(Exception e){ }
 			return "";
 		}
-		else if (arg[0].equalsIgnoreCase("read")){
+		else if (arg[0].equalsIgnoreCase("read")&&arg.length==2){
 			String cres="";
 			for (int i=1;i<arg.length;i++){
 				cres+=arg[i]+" ";
@@ -679,6 +681,7 @@ public class EBot extends JFrame implements Runnable{
 			try{
 				type(cres,"");
 				cres=in.readLine();
+				cres=cres.substring(cres.lastIndexOf(":")+1);
 			}
 			catch(Exception e) {}
 			return cres;
@@ -689,10 +692,10 @@ public class EBot extends JFrame implements Runnable{
 		}
 		else if (arg[0].equalsIgnoreCase("if")){
 			if (arg[1].equalsIgnoreCase("0")){
-				return evaldot(arg[3]);
+				return arg[3];
 			}
 			else{
-				return evaldot(arg[2]);
+				return arg[2];
 			}
 		}
 		else if (arg[0].equalsIgnoreCase("var")&&arg.length==3){
@@ -709,8 +712,41 @@ public class EBot extends JFrame implements Runnable{
 			}
 			return ""+setvar;
 		}
+        else if (arg[0].equalsIgnoreCase("lambda")){
+            return "runlambda '"+arg[1]+"\" '"+arg[2]+"\"";
+        }
+        else if (arg[0].equalsIgnoreCase("runlambda")){
+            arg[1] = arg[1].replaceFirst("^\\(","");
+            arg[1] = arg[1].replaceFirst("\\)$","");
+            arg[1] = arg[1].replaceAll(" +"," ");
+            String[] lambdaArg = arg[1].split(" ");
+            String to_eval;
+            to_eval = arg[2];
+            to_eval = to_eval.replaceAll("\\("," ( ");
+            to_eval = to_eval.replaceAll("\\)"," ) ");
+            to_eval = to_eval.replaceAll("'"," ' ");
+            to_eval = to_eval.replaceAll("\""," \" ");
+            int i;
+            int q;
+            int argNum = 3;
+            String[] to_eval_array;
+            for(i=0,q=0; i < lambdaArg.length;++i,++argNum){
+                to_eval_array = to_eval.split(" ");
+                for(q=0;q < to_eval_array.length;++q){
+                    if(to_eval_array[q].equals(lambdaArg[i])) {
+                        to_eval_array[q] = arg[argNum];
+                    }
+                }
+                to_eval = combine(to_eval_array," ");
+            }
+            to_eval = to_eval.replaceAll(" \\( ","(");
+            to_eval = to_eval.replaceAll(" \\) ",")");
+            to_eval = to_eval.replaceAll(" ' ","'");
+            to_eval = to_eval.replaceAll(" \" ","\"");
+            return "(eval '"+to_eval+"\")";
+        }
 		else{
-			return "";
+            return "";
 		}
 	}
 	public String[] requote(String[] ar) {
@@ -726,38 +762,34 @@ public class EBot extends JFrame implements Runnable{
   		return ar;
 	}
 	public String unquote(String ar) {
-		quo=Pattern.compile("'[^'\"]*\"");
-		nowa=quo.matcher(ar);
-  		while(nowa.find()) {
-			String m=nowa.group(0);
-    			m = m.replaceAll("^.","---");
-    			m = m.replaceAll(".$","~~~");
-    			m = m.replaceAll("\\(","{");
-    			m = m.replaceAll("\\)","}");
-    			m = m.replaceAll(" ","<>");
-    			String result = nowa.replaceFirst(m);
-			return unquote(result);
-  		}
-		return ar;
+            Pattern lisp;
+            Matcher now;
+            Pattern quo;
+            Matcher nowa;
+            quo=Pattern.compile("'[^'\"]*\"");
+            nowa=quo.matcher(ar);
+            while(nowa.find()) {
+                String m=nowa.group(0);
+                m = m.replaceAll("^.","---");
+                m = m.replaceAll(".$","~~~");
+                m = m.replaceAll("\\(","{");
+                m = m.replaceAll("\\)","}");
+                m = m.replaceAll(" ","<>");
+                String result = nowa.replaceFirst(m);
+                return unquote(result);
+            }
+            return ar;
 	}
-	public String evaldot(String code){
-		equo=Pattern.compile("'[^'\"]*\"");
-		enowa=equo.matcher(code);
-		code=unquote(code);
-		elisp=Pattern.compile("\\([^()]*\\)");
-		enow=elisp.matcher(code);
-		while (enow.find()){
-			String m=enow.group(0);
-			m=m.replace("(","");
-			m=m.replace(")","");
-			String[] arg=m.split(" ");
-			String res=eval(arg);
-			eresult = enow.replaceFirst(res);
-			return evaldot(eresult);
-		}
-		String[] cfin=code.split(" ");
-		return cfin[cfin.length-1];
-	}
+    public String combine(String[] s, String glue) {
+        int k=s.length;
+        if (k==0)
+            return null;
+        StringBuilder out=new StringBuilder();
+        out.append(s[0]);
+        for (int x=1;x<k;++x)
+            out.append(glue).append(s[x]);
+        return out.toString();
+    }
 public class SendButtonListener implements ActionListener{
 	public void actionPerformed(ActionEvent e){
 		if (expects.equals("host")){
