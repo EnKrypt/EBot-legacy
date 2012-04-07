@@ -13,7 +13,8 @@
 //   *  You should have received a copy of the GNU General Public License     *
 //   *  along with this program.  If not, see <http://www.gnu.org/licenses/>. *
 //   *                                                                        *
-//   *         (C) Arvind Kumar 2011 . All rights reserved                    *
+//   *         (C) Arvind Kumar 2011 .                                        *
+//   *         (C) James McClain 2011 .                                       *
 //   **************************************************************************
 
 import java.io.*;
@@ -242,7 +243,8 @@ public class EBot extends JFrame implements Runnable{
 					}
 					if (a.equalsIgnoreCase("!version")||a.equalsIgnoreCase("!info")||a.equalsIgnoreCase("!whomademe")||a.equalsIgnoreCase("!author")){
 						type("EBot v3.4  Coded by EnKrypt . Last update on 04.06.12",mode);
-						type("EnKrypt IRC Bot",mode);
+						type("Lambda , RunLambda made by JamezQ",mode);
+						type(" - EnKrypt IRC Bot",mode);
 						show(by+" now knows more about EBot");
 					}
 					if (a.startsWith("!ip ")||a.startsWith("!IP ")){
@@ -577,9 +579,9 @@ public class EBot extends JFrame implements Runnable{
 			return ""+cres;
 		}
 		else if (arg[0].equalsIgnoreCase("div")){
-			int cres=Integer.parseInt(arg[1]);
+			double cres=Double.parseDouble(arg[1]);
 			for (int i=2;i<arg.length;i++){
-				cres/=Integer.parseInt(arg[i]);
+				cres/=Double.parseDouble(arg[i]);
 			}
 			return ""+cres;
 		}
@@ -617,7 +619,7 @@ public class EBot extends JFrame implements Runnable{
 			String cres="";
 			int flag=1;
 			for (int i=2;i<arg.length;i++){
-				if (Math.max(Integer.parseInt(arg[i-1]),Integer.parseInt(arg[i]))!=Integer.parseInt(arg[i-1])){
+				if ((Math.max(Integer.parseInt(arg[i-1]),Integer.parseInt(arg[i]))!=Integer.parseInt(arg[i-1]))||Integer.parseInt(arg[i])==Integer.parseInt(arg[i-1])){
 					flag=0;
 				}
 			}
@@ -627,7 +629,7 @@ public class EBot extends JFrame implements Runnable{
 			String cres="";
 			int flag=1;
 			for (int i=2;i<arg.length;i++){
-				if (Math.min(Integer.parseInt(arg[i-1]),Integer.parseInt(arg[i]))!=Integer.parseInt(arg[i-1])){
+				if ((Math.min(Integer.parseInt(arg[i-1]),Integer.parseInt(arg[i]))!=Integer.parseInt(arg[i-1]))||Integer.parseInt(arg[i])==Integer.parseInt(arg[i-1])){
 					flag=0;
 				}
 			}
@@ -645,17 +647,17 @@ public class EBot extends JFrame implements Runnable{
 		}
 		else if (arg[0].equalsIgnoreCase("or")){
 			String cres="";
-			int flag=1;
+			int flag=0;
 			for (int i=1;i<arg.length;i++){
 				if (!arg[i].equalsIgnoreCase("0")){
-					flag=0;
+					flag=1;
 				}
 			}
 			return flag+"";
 		}
 		else if (arg[0].equalsIgnoreCase("not")){
 			String cres="";
-			if (arg.length==2&&arg[1].equalsIgnoreCase("0")){
+			if (arg[1].equalsIgnoreCase("0")){
 				return "1";
 			}
 			else{
