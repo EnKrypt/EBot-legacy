@@ -25,7 +25,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class EBot extends JFrame implements Runnable{
+public class EBot implements Runnable{
 	
 	static BufferedReader in;
 	static BufferedReader b;
