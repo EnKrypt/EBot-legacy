@@ -661,12 +661,21 @@ public class EBot implements Runnable{
 			for (int i=1;i<arg.length;i++){
 				cres+=arg[i]+" ";
 			}
-			try{
-				type(cres,"");
-				cres=in.readLine();
-				cres=cres.substring(cres.lastIndexOf(":")+1);
+			if (cres.equals(" ")){
+				try{
+					cres=in.readLine();
+					cres=cres.substring(cres.lastIndexOf(":")+1);
+				}
+				catch(Exception e) {}
 			}
-			catch(Exception e) {}
+			else{
+				try{
+					type(cres,"");
+					cres=in.readLine();
+					cres=cres.substring(cres.lastIndexOf(":")+1);
+				}
+				catch(Exception e) {}
+			}
 			return cres;
 		}
 		else if (arg[0].equalsIgnoreCase("pass")){
