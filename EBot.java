@@ -697,6 +697,19 @@ public class EBot extends JFrame implements Runnable{
 			}
 			return cres;
 		}
+		else if (arg[0].equalsIgnoreCase("read-url")){
+			String lin="",cres="";
+			try{
+				URL url=new URL(arg[1]);
+				BufferedReader read=new BufferedReader(new InputStreamReader(url.openStream()));
+				while ((lin=read.readLine())!=null){
+					cres+=lin+" ";
+				}
+				read.close();
+			}
+			catch(Exception e){ e.printStackTrace(); }
+			return "'"+cres+"\"";
+		}
 		else if (arg[0].equalsIgnoreCase("pass")){
 			String cres="";
 			return "";
