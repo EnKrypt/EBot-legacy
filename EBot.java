@@ -559,23 +559,23 @@ public class EBot extends JFrame implements Runnable{
                  //     System.out.println(i+" : "+arg[i]);
                  // }
 		if (arg[0].equalsIgnoreCase("add")){
-			int cres=0;
+			double cres=0;
 			for (int i=1;i<arg.length;i++){
-				cres+=Integer.parseInt(arg[i]);
+				cres+=Double.parseDouble(arg[i]);
 			}
 			return ""+cres;
 		}
 		else if (arg[0].equalsIgnoreCase("sub")){
-			int cres=Integer.parseInt(arg[1]);
+			double cres=Double.parseDouble(arg[1]);
 			for (int i=2;i<arg.length;i++){
-				cres-=Integer.parseInt(arg[i]);
+				cres-=Double.parseDouble(arg[i]);
 			}
 			return ""+cres;
 		}
 		else if (arg[0].equalsIgnoreCase("mul")){
-			int cres=Integer.parseInt(arg[1]);;
+			double cres=Double.parseDouble(arg[1]);;
 			for (int i=2;i<arg.length;i++){
-				cres*=Integer.parseInt(arg[i]);
+				cres*=Double.parseDouble(arg[i]);
 			}
 			return ""+cres;
 		}
@@ -783,8 +783,8 @@ public class EBot extends JFrame implements Runnable{
 			try{
 				devi=mkdev.get(arg[0]).toString();
 			}
-			catch(NullPointerException npe){
-				devi="";
+			catch(Exception npe){
+				return "";
 			}
             return "("+devi+param+")";
 		}
