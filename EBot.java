@@ -46,6 +46,7 @@ public class EBot extends JFrame implements Runnable{
 	static Pattern equo;
 	static Matcher enowa;
 	static Map var=new HashMap();
+	static Map mkdev=new HashMap();
 	static String result;
 	static String eresult;
 
@@ -710,6 +711,10 @@ public class EBot extends JFrame implements Runnable{
 			catch(Exception e){ e.printStackTrace(); }
 			return "'"+cres+"\"";
 		}
+		else if (arg[0].equalsIgnoreCase("mkdev")&&arg.length==3){
+			mkdev.put(arg[1],arg[2]);
+			return "";
+		}
 		else if (arg[0].equalsIgnoreCase("pass")){
 			String cres="";
 			return "";
@@ -770,7 +775,18 @@ public class EBot extends JFrame implements Runnable{
             return "(eval '"+to_eval+"\")";
         }
 		else{
-            return "";
+			String devi="";
+			String param="";
+			for (int i=1;i<arg.length;i++){
+				param+=" "+arg[i];
+			}
+			try{
+				devi=mkdev.get(arg[0]).toString();
+			}
+			catch(NullPointerException npe){
+				devi="";
+			}
+            return "("+devi+param+")";
 		}
 	}
 	public String[] requote(String[] ar) {
