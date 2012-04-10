@@ -243,7 +243,7 @@ public class EBot extends JFrame implements Runnable{
 						}
 					}
 					if (a.equalsIgnoreCase("!version")||a.equalsIgnoreCase("!info")||a.equalsIgnoreCase("!whomademe")||a.equalsIgnoreCase("!author")){
-						type("EBot v3.4  Coded by EnKrypt . Last update on 04.06.12",mode);
+						type("EBot v4.1  Coded by EnKrypt . Last update on 04.10.12",mode);
 						type("Lambda , RunLambda made by JamezQ",mode);
 						type(" - EnKrypt IRC Bot",mode);
 						show(by+" now knows more about EBot");
@@ -620,7 +620,7 @@ public class EBot extends JFrame implements Runnable{
 			String cres="";
 			int flag=1;
 			for (int i=2;i<arg.length;i++){
-				if ((Math.max(Integer.parseInt(arg[i-1]),Integer.parseInt(arg[i]))!=Integer.parseInt(arg[i-1]))||Integer.parseInt(arg[i])==Integer.parseInt(arg[i-1])){
+				if ((Math.max(Double.parseDouble(arg[i-1]),Double.parseDouble(arg[i]))!=Double.parseDouble(arg[i-1]))||Double.parseDouble(arg[i])==Double.parseDouble(arg[i-1])){
 					flag=0;
 				}
 			}
@@ -630,11 +630,14 @@ public class EBot extends JFrame implements Runnable{
 			String cres="";
 			int flag=1;
 			for (int i=2;i<arg.length;i++){
-				if ((Math.min(Integer.parseInt(arg[i-1]),Integer.parseInt(arg[i]))!=Integer.parseInt(arg[i-1]))||Integer.parseInt(arg[i])==Integer.parseInt(arg[i-1])){
+				if ((Math.min(Double.parseDouble(arg[i-1]),Double.parseDouble(arg[i]))!=Double.parseDouble(arg[i-1]))||Double.parseDouble(arg[i])==Double.parseDouble(arg[i-1])){
 					flag=0;
 				}
 			}
 			return flag+"";
+		}
+		else if (arg[0].equalsIgnoreCase("strlen")){
+			return ""+arg[1].length();
 		}
 		else if (arg[0].equalsIgnoreCase("and")){
 			String cres="";
