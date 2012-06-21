@@ -1,0 +1,6 @@
+(var b 'nigas")
+(var c 'nigas yo")
+(var a 'test")
+(mkdev die '(lambda '(x y)" '(mul y x)")")
+(mkdev neq '(lambda '(number1 number2)" '(eq (add number1 0) (add number2 0))")")
+(mkdev square '(lambda '(x)" '(mul x x)")")

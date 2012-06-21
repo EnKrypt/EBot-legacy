@@ -270,6 +270,45 @@ public class EBot implements Runnable{
 							show(by+" saved quote "+b);
 						}
 					}
+					if (a.startsWith("!count ")||a.startsWith("!COUNT ")){
+						b=a.substring(7);
+						File file=new File(b);
+						if (file.exists()){
+						type(""+count(b),mode);
+						show(by+" tried to count number of lines in "+b);
+						}
+						else{
+							type(b+" does not exist",mode);
+							show(by+" tried to count "+b+" but it did not exist");
+						}
+					}
+					if (a.startsWith("!addemote ")||a.startsWith("!ADDEMOTE ")){
+						b=a.substring(10);
+						int f1=0;	
+						try{
+							if (b.trim()==null||b.trim().equals("")){
+								f1=1;
+							}
+						}
+						catch(NullPointerException n){
+							f1=1;
+						}
+						if (f1==0){
+							if (hasfile("emotes.txt",b)){
+								type("Emote exists",mode);
+								show(by+" couldnt add emote "+b+" because it already existed");
+							}
+							else{
+								BufferedWriter l=new BufferedWriter(new FileWriter("emotes.txt",true));
+								l.newLine();
+								l.write(b);
+								l.close();
+								type("Emote added",mode);
+								show(by+" saved emote "+b);
+							}
+						}
+					}
+					
 					if (a.equalsIgnoreCase("!quote")){
 						int size=count("quotes.txt");
 						double ran=Math.random()*size;
@@ -508,7 +547,18 @@ public class EBot implements Runnable{
 			count++;
 		}
 		return count;
-    	}
+    }
+	public boolean hasfile(String filename,String arg) throws IOException {
+        File file = new File(filename);
+		Scanner scanner = new Scanner(file);
+		boolean count = false;
+		while (scanner.hasNextLine()) {
+			String line = scanner.nextLine();
+			if (line.equals(arg))
+				count=true;
+		}
+		return count;
+    }
 	public String dot(String code){
         Pattern lisp;
         Matcher now;
@@ -624,7 +674,7 @@ public class EBot implements Runnable{
 			String cres="";
 			int flag=1;
 			for (int i=1;i<arg.length;i++){
-				if (arg[i].equalsIgnoreCase("0")){
+				if (arg[i].equalsIgnoreCase("0")||arg[i].equalsIgnoreCase("0.0")){
 					flag=0;
 				}
 			}
@@ -634,7 +684,7 @@ public class EBot implements Runnable{
 			String cres="";
 			int flag=0;
 			for (int i=1;i<arg.length;i++){
-				if (!arg[i].equalsIgnoreCase("0")){
+				if (!arg[i].equalsIgnoreCase("0")||arg[i].equalsIgnoreCase("0")){
 					flag=1;
 				}
 			}
@@ -642,7 +692,7 @@ public class EBot implements Runnable{
 		}
 		else if (arg[0].equalsIgnoreCase("not")){
 			String cres="";
-			if (arg[1].equalsIgnoreCase("0")){
+			if (arg[1].equalsIgnoreCase("0")||arg[1].equalsIgnoreCase("0")){
 				return "1";
 			}
 			else{
@@ -695,6 +745,47 @@ public class EBot implements Runnable{
 			catch(Exception e){ e.printStackTrace(); }
 			return "'"+cres+"\"";
 		}
+		else if (arg[0].equalsIgnoreCase("save")){
+			String lin="",cres="";
+			try{
+				File fil=new File(arg[1]);
+				if (!fil.exists()){
+					fil.createNewFile();
+				}
+				BufferedWriter read=new BufferedWriter(new FileWriter(arg[1]));
+				Set cvar = var.keySet();
+				Set cmkdev = mkdev.keySet();
+				Iterator itrv = cvar.iterator();
+				Iterator itrm = cmkdev.iterator();
+				while (itrv.hasNext()){
+					String nex=itrv.next().toString();
+					read.write("(var "+nex+" '"+var.get(nex)+"\")");
+					read.newLine();
+					read.flush();
+				}
+				while (itrm.hasNext()){
+					String nex=itrm.next().toString();
+					read.write("(mkdev "+nex+" '"+mkdev.get(nex)+"\")");
+					read.newLine();
+					read.flush();
+				}
+				read.close();
+			}
+			catch(Exception e){ e.printStackTrace(); }
+			return "(eval '"+cres+"\")";
+		}
+		else if (arg[0].equalsIgnoreCase("include")){
+			String lin="",cres="";
+			try{
+				BufferedReader read=new BufferedReader(new FileReader(arg[1]));
+				while ((lin=read.readLine())!=null){
+					cres+=lin+" ";
+				}
+				read.close();
+			}
+			catch(Exception e){ e.printStackTrace(); }
+			return "(eval '"+cres+"\")";
+		}
 		else if (arg[0].equalsIgnoreCase("mkdev")&&arg.length==3){
 			mkdev.put(arg[1],arg[2]);
 			return "";
@@ -704,7 +795,7 @@ public class EBot implements Runnable{
 			return "";
 		}
 		else if (arg[0].equalsIgnoreCase("if")){
-			if (arg[1].equalsIgnoreCase("0")){
+			if (arg[1].equalsIgnoreCase("0")||arg[1].equalsIgnoreCase("0")){
 				return arg[3];
 			}
 			else{

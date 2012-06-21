@@ -643,7 +643,7 @@ public class EBot extends JFrame implements Runnable{
 			String cres="";
 			int flag=1;
 			for (int i=1;i<arg.length;i++){
-				if (arg[i].equalsIgnoreCase("0")){
+				if (arg[i].equalsIgnoreCase("0")||arg[i].equalsIgnoreCase("0.0")){
 					flag=0;
 				}
 			}
@@ -653,7 +653,7 @@ public class EBot extends JFrame implements Runnable{
 			String cres="";
 			int flag=0;
 			for (int i=1;i<arg.length;i++){
-				if (!arg[i].equalsIgnoreCase("0")){
+				if (!arg[i].equalsIgnoreCase("0")||arg[i].equalsIgnoreCase("0")){
 					flag=1;
 				}
 			}
@@ -661,7 +661,7 @@ public class EBot extends JFrame implements Runnable{
 		}
 		else if (arg[0].equalsIgnoreCase("not")){
 			String cres="";
-			if (arg[1].equalsIgnoreCase("0")){
+			if (arg[1].equalsIgnoreCase("0")||arg[1].equalsIgnoreCase("0")){
 				return "1";
 			}
 			else{
@@ -714,6 +714,47 @@ public class EBot extends JFrame implements Runnable{
 			catch(Exception e){ e.printStackTrace(); }
 			return "'"+cres+"\"";
 		}
+		else if (arg[0].equalsIgnoreCase("save")){
+			String lin="",cres="";
+			try{
+				File fil=new File(arg[1]);
+				if (!fil.exists()){
+					fil.createNewFile();
+				}
+				BufferedWriter read=new BufferedWriter(new FileWriter(arg[1]));
+				Set cvar = var.keySet();
+				Set cmkdev = mkdev.keySet();
+				Iterator itrv = cvar.iterator();
+				Iterator itrm = cmkdev.iterator();
+				while (itrv.hasNext()){
+					String nex=itrv.next().toString();
+					read.write("(var "+nex+" '"+var.get(nex)+"\")");
+					read.newLine();
+					read.flush();
+				}
+				while (itrm.hasNext()){
+					String nex=itrm.next().toString();
+					read.write("(mkdev "+nex+" '"+mkdev.get(nex)+"\")");
+					read.newLine();
+					read.flush();
+				}
+				read.close();
+			}
+			catch(Exception e){ e.printStackTrace(); }
+			return "(eval '"+cres+"\")";
+		}
+		else if (arg[0].equalsIgnoreCase("include")){
+			String lin="",cres="";
+			try{
+				BufferedReader read=new BufferedReader(new FileReader(arg[1]));
+				while ((lin=read.readLine())!=null){
+					cres+=lin+" ";
+				}
+				read.close();
+			}
+			catch(Exception e){ e.printStackTrace(); }
+			return "(eval '"+cres+"\")";
+		}
 		else if (arg[0].equalsIgnoreCase("mkdev")&&arg.length==3){
 			mkdev.put(arg[1],arg[2]);
 			return "";
@@ -723,7 +764,7 @@ public class EBot extends JFrame implements Runnable{
 			return "";
 		}
 		else if (arg[0].equalsIgnoreCase("if")){
-			if (arg[1].equalsIgnoreCase("0")){
+			if (arg[1].equalsIgnoreCase("0")||arg[1].equalsIgnoreCase("0")){
 				return arg[3];
 			}
 			else{

@@ -1,0 +1,16 @@
+(var for
+ '(lambda '(variable_init condition variable_transform code)"
+   'variable_init
+    (if condition
+      'code variable_transform ((var for) '" 'condition" 'variable_transform" 'code")"
+      '"
+    )
+   "
+ )"
+)
+
+(var while '(lambda '(condition code)" '((var for) '" 'condition" '" 'code")")")
+
+(var until '(lambda '(condition code)" '((var while) '(not condition)" 'code")")")
+
+(var dowhile '(lambda '(code condition)" 'code ((var while) 'condition" 'code")")")
