@@ -684,7 +684,7 @@ public class EBot implements Runnable{
 			String cres="";
 			int flag=0;
 			for (int i=1;i<arg.length;i++){
-				if (!arg[i].equalsIgnoreCase("0")||arg[i].equalsIgnoreCase("0")){
+				if (!arg[i].equalsIgnoreCase("0")&&!arg[i].equalsIgnoreCase("0.0")){
 					flag=1;
 				}
 			}
@@ -730,7 +730,16 @@ public class EBot implements Runnable{
 				}
 				catch(Exception e) {}
 			}
-			return cres;
+			return "'"+cres+"\"";
+		}
+		else if (arg[0].equalsIgnoreCase("read")&&arg.length==1){
+			String cres="";
+			try{
+				cres=in.readLine();
+				cres=cres.substring(cres.lastIndexOf(":")+1);
+			}
+			catch(Exception e) {}
+			return "'"+cres+"\"";
 		}
 		else if (arg[0].equalsIgnoreCase("read-url")){
 			String lin="",cres="";
