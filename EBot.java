@@ -91,6 +91,7 @@ public class EBot extends JFrame implements Runnable{
 		
 		show("****************************************************EBOT - FOR IRC****************************************************\n");
 		show("IRC Bot by EnKrypt\n");
+		show("Version 4.5\n");
 		
 		incoming.append("Host: ");
 		expects="host";
@@ -243,7 +244,7 @@ public class EBot extends JFrame implements Runnable{
 						}
 					}
 					if (a.equalsIgnoreCase("!version")||a.equalsIgnoreCase("!info")||a.equalsIgnoreCase("!whomademe")||a.equalsIgnoreCase("!author")){
-						type("EBot v4.1  Coded by EnKrypt . Last update on 04.10.12",mode);
+						type("EBot v4.5  Coded by EnKrypt . Last update on 04.06.13",mode);
 						type("Lambda , RunLambda made by JamezQ",mode);
 						type(" - EnKrypt IRC Bot",mode);
 						show(by+" now knows more about EBot");
@@ -392,50 +393,8 @@ public class EBot extends JFrame implements Runnable{
 						}
 					}
 					if (a.equalsIgnoreCase("!help")||a.equalsIgnoreCase("!commands")){
-						type("Commands for EBot: ",mode);
-						type("!say <text> . Makes EBot say text. ",mode);
-						type("!hello . Greet EBot ",mode);
-						type("!lol . Make EBot lol ",mode);
-						type("!help . Shows the help page ",mode);
-						type("!binary <number> . Shows the binary conversion of the number ",mode);	
-						type("!octal <number> . Shows the octal conversion of the number ",mode);
-						try{
-							Thread.sleep(5000);
-						}
-						catch(Exception e){
-						}
-						type("!hex <number> . Shows the hexadecimal conversion of the number ",mode);
-						type("!prime <integer> . Checks the primality of the number ",mode);
-						type("!random <limit> . Gives a random number from 0 to the limit specified ",mode);
-						type("!pick <1starg,2ndarg....,ntharg> . Randomly picks out a choice from the arguments ",mode);
-						type("!info . Short description of EBot ",mode);
-						type("!ip <domain> . Converts domain to IP address ",mode);
-						type("!reverse <text> . Reverses text ",mode);
-						type("!1337 <text> . Converts text into leetspeak ",mode);
-						type("!quote . Makes EBot say a random quote from the list of quotes ",mode);
-						type("!quote <quote> . Adds the quote to the list of quotes ",mode);
-						type("!you <text> . Makes EBot rp the text ",mode);
-						type("!pl <lisp expression> . Evaluates the Lisp expression by running it through EBot's integrated PL-0 parser ",mode);
-						type("!mode <mode> . Starts a modifier ",mode);
-						type(" ",mode);
-						try{
-							Thread.sleep(30000);
-						}
-						catch(Exception e){
-						}
-						type("Modifiers: ( to be used with !mode )",mode);
-						type("mor : Reveres all text given by EBot",mode);
-						type("1337 : Converts all text given by EBot to leetspeak",mode);
-						type(" ",mode);
-						type("All commands are case insensitive. ",mode);
-						type("Single command help is not available currently. ",mode);
-						type("There are a few more additional commands that are meant for administration. ",mode);
-						type("And also a few that do the same as above. Example !mor and !rev function the same as !reverse. ",mode);
-						type(" ",mode);
-						type("The person running EBot can also chat using console ",mode);
-						type("Typing anything normally will function as a normal PRIVMSG to the current channel ",mode);
-						type("Prepending the text with a \"/\" will send a direct raw command ",mode);
-						type("----------------------End of Help--------------------- ",mode);
+						type("To prevent spam and excess flood , the in-built help has been removed.",mode);
+						type("Please refer here for help and commands - https://raw.github.com/EnKrypt/EBot/master/Help.txt",mode);
 						show(by+" needed help with EBot");
 					} 
 				}
@@ -528,6 +487,17 @@ public class EBot extends JFrame implements Runnable{
 		}
 		return count;
     	}
+	public boolean hasfile(String filename,String arg) throws IOException {
+        File file = new File(filename);
+		Scanner scanner = new Scanner(file);
+		boolean count = false;
+		while (scanner.hasNextLine()) {
+			String line = scanner.nextLine();
+			if (line.equals(arg))
+				count=true;
+		}
+		return count;
+    }
 	public String dot(String code){
         Pattern lisp;
         Matcher now;
@@ -653,7 +623,7 @@ public class EBot extends JFrame implements Runnable{
 			String cres="";
 			int flag=0;
 			for (int i=1;i<arg.length;i++){
-				if (!arg[i].equalsIgnoreCase("0")||arg[i].equalsIgnoreCase("0")){
+				if (!arg[i].equalsIgnoreCase("0")&&!arg[i].equalsIgnoreCase("0.0")){
 					flag=1;
 				}
 			}
@@ -661,7 +631,7 @@ public class EBot extends JFrame implements Runnable{
 		}
 		else if (arg[0].equalsIgnoreCase("not")){
 			String cres="";
-			if (arg[1].equalsIgnoreCase("0")||arg[1].equalsIgnoreCase("0")){
+			if (arg[1].equalsIgnoreCase("0")||arg[1].equalsIgnoreCase("0.0")){
 				return "1";
 			}
 			else{

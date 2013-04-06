@@ -1,17 +1,3 @@
-An immensely fun and interesting project which I enjoyed programming.
-
-What EBot is : 
-
-Just a simple IRC bot made by me
-Expanded on JTel , another project of mine
-
-A CUI Version has been included after the 3.0 release to ensure compatibility over command line utilities.
-
-LogBot v1.0 has also been added. LogBot is just an extension and a modified EBot , suited solely for logging. It logs all conversation to log.txt and does not serve any commands. Due to thae fact that this just an edited version of EBot , LogBot can have many unnecessary residue from the commands of EBot and can resemble EBot in many ways.
-
-A Pl0 Parser has been added to EBot to increase Bot functionality. The entire Lisp code ( everything about it , standards , functions etc) are included in http://github.com/EnKrypt/JPL0
-Please refer to that link for any doubts pertaining to lisp functionality of the bot
-
 Help + commands :
 
 !say <text> . Makes EBot say text. 
@@ -33,9 +19,12 @@ Help + commands :
 !you <text> . Makes EBot rp the text 
 !pl <lisp expression> . Evaluates the Lisp expression by running it through EBot's integrated PL-0 parser 
 !mode <mode> . Starts a modifier 
+!google <text> . Makes Ebot google the text
+
 Modifiers: ( to be used with !mode )
 mor : Reveres all text given by EBot
 1337 : Converts all text given by EBot to leetspeak
+
 All commands are case insensitive. 
 Single command help is not available currently. 
 There are a few more additional commands that are meant for administration. 
@@ -43,4 +32,5 @@ And also a few that do the same as above. Example !mor and !rev function the sam
 The person running EBot can also chat using console 
 Typing anything normally will function as a normal PRIVMSG to the current channel 
 Prepending the text with a "/" will send a direct raw command 
+
 ----------------------End of Help--------------------- 
